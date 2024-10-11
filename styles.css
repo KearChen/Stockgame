@@ -1,0 +1,85 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    padding: 20px;
+    margin: 0; /* 移除默认 margin */
+}
+
+h1 {
+    color: #333;
+    font-size: 1.5em; /* 增加字体大小 */
+}
+
+#game {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    width: 90%; /* 使用百分比宽度 */
+    max-width: 500px;
+}
+
+#stockPrice {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 45%; /* 使用百分比宽度，方便在小屏幕上对齐 */
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+#result {
+    font-size: 1.5em;
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+#timer, #balance, #holdings, #totalAssets {
+    margin-top: 10px;
+}
+
+#klineChart {
+    margin-top: 20px;
+    max-width: 100%; /* 确保图表在小屏幕上自适应 */
+}
+
+/* 媒体查询 */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.2em; /* 在小屏幕上减小标题字体 */
+    }
+    
+    #game {
+        padding: 15px; /* 减少内边距 */
+    }
+    
+    button {
+        font-size: 14px; /* 减小按钮字体 */
+        padding: 8px 15px; /* 调整按钮内边距 */
+    }
+    
+    #stockPrice {
+        font-size: 1.5em; /* 减小股票价格字体 */
+    }
+    
+    #result {
+        font-size: 1.2em; /* 减小结果字体 */
+    }
+}

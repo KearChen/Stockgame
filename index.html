@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勇闯O股</title>
+    <link rel="stylesheet" href="styles.css"> <!-- 外部样式表 -->
+    <script src="chart.js"></script>
+</head>
+
+<body>
+    <h1>勇闯O股</h1>
+    <div id="game">
+        <div id="stockPrice">下证指数: <span id="price">3000.00</span></div>
+        <button id="buyBtn">买入10份</button>
+        <button id="sellBtn">卖出10份</button>
+        <div id="timer">剩余时间: <span id="time">30</span> 秒</div>
+        <div>剩余资金: ¥<span id="balance">500000</span></div>
+        <div>持仓: <span id="holdings">0</span> 份指数</div>
+        <div>总资产: ¥<span id="totalAssets">1000000</span></div>
+        <div id="result" class="hidden"></div>
+        <div id="level" class="hidden"></div>
+
+        <!-- 重新开始按钮 -->
+        <button id="resetBtn" class="hidden">重新开始</button>
+
+        <!-- K线图 -->
+        <canvas id="klineChart" width="400" height="200"></canvas>
+    </div>
+
+
+    <script>
+        let balance, holdings, stockPrice, timeLeft, timerInterval, gameInterval;
+
+        // 初始化游戏状态
+        function initGame() {
+            balance = 500000; // 初始资金
+            holdings = 0; // 初始持仓
+            stockPrice = 3000; // 初始下证指数价格
+            timeLeft = 30; // 游戏时限
+            document.getElementById('result').classList.add('hidden');
+            document.getElementById('level').classList.add('hidden');
+            updateDisplay();
+
+            // 重置 K线数据
+            klineData.labels = [];
+            klineData.datasets[0].data = []; // 价格数据
+            klineData.datasets[1].data = []; // 买入标记
+            klineData.datasets[2].data = []; // 卖出标记
+            klineChart.update(); // 更新图表以反映重置后的数据
+        }
+
+        // K线数据
+        const klineData = {
+            labels: [],
+            datasets: [{
+                label: '下证指数',
+                data: [],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+                tension: 0.1
+            }, {
+                label: '买入标记',
+                data: [], // 买入标记数据
+                borderColor: 'rgba(0, 255, 0, 1)', // 绿色
+                borderWidth: 0,
+                pointRadius: 5,
+                pointBackgroundColor: 'rgba(0, 255, 0, 1)',
+                fill: false,
+                tension: 0
+            }, {
+                label: '卖出标记',
+                data: [], // 卖出标记数据
+                borderColor: 'rgba(255, 0, 0, 1)', // 红色
+                borderWidth: 0,
+                pointRadius: 5,
+                pointBackgroundColor: 'rgba(255, 0, 0, 1)',
+                fill: false,
+                tension: 0
+            }]
+        };
+
+        // K线图表设置
+        const ctx = document.getElementById('klineChart').getContext('2d');
+        const klineChart = new Chart(ctx, {
+            type: 'line',
+            data: klineData,
+            options: {
+                responsive: true,
+                scales: {
+                    x: { display: true, title: { display: true, text: '时间 (秒)' } },
+                    y: { display: true, title: { display: true, text: '价格 (点)' } }
+                }
+            }
+        });
+
+        // 更新 K线图
+        function updateKline() {
+            const currentTime = 30 - timeLeft;
+            klineData.labels.push(currentTime + 's');
+            klineData.datasets[0].data.push(stockPrice);
+            klineChart.update();
+        }
+
+        // 更新下证指数价格
+        function updateStockPrice() {
+            const randomChange = (Math.random() < 0.5 ? -1 : 1) * (Math.random() * 100);
+            stockPrice = Math.max(500, stockPrice + randomChange);
+            document.getElementById('price').innerText = stockPrice.toFixed(2);
+            updateKline();
+            updateDisplay();
+        }
+
+
+        // 买入操作
+        document.getElementById('buyBtn').addEventListener('click', function () {
+            const sharesToBuy = 10;
+            const cost = sharesToBuy * stockPrice;
+            if (balance >= cost) {
+                balance -= cost;
+                holdings += sharesToBuy;
+                updateDisplay();
+                addBuyMarker(); // 添加买入标记
+            } else {
+                alert("资金不足，无法继续买入！");
+            }
+        });
+
+        // 卖出操作
+        document.getElementById('sellBtn').addEventListener('click', function () {
+            const sharesToSell = 10;
+            if (holdings >= sharesToSell) {
+                balance += sharesToSell * stockPrice;
+                holdings -= sharesToSell;
+                updateDisplay();
+                addSellMarker(); // 添加卖出标记
+            } else {
+                alert("持仓不足，无法继续卖出！");
+            }
+        });
+
+        // 添加买入标记
+        function addBuyMarker() {
+            const currentTime = 30 - timeLeft;
+            klineData.datasets[1].data.push({x: currentTime + 's', y: stockPrice}); // 添加买入价格
+            klineChart.update();
+        }
+
+        // 添加卖出标记
+        function addSellMarker() {
+            const currentTime = 30 - timeLeft;
+            klineData.datasets[2].data.push({x: currentTime + 's', y: stockPrice}); // 添加卖出价格
+            klineChart.update();
+        }
+
+        // 更新显示内容
+        function updateDisplay() {
+            const totalAssets = balance + holdings * stockPrice;
+            document.getElementById('balance').innerText = balance.toFixed(2);
+            document.getElementById('holdings').innerText = holdings.toFixed(2);
+            document.getElementById('totalAssets').innerText = totalAssets.toFixed(2);
+
+            // 管理按钮状态
+            document.getElementById('buyBtn').disabled = (balance < stockPrice * 10); // 判断是否可以买入
+            document.getElementById('sellBtn').disabled = (holdings < 10); // 判断是否可以卖出
+        }
+
+        // 游戏结束处理
+        function endGame() {
+            clearInterval(timerInterval);
+            clearInterval(gameInterval);
+            const finalValue = balance + holdings * stockPrice;
+            // 盈利
+            if (finalValue > 500000) {
+                document.getElementById('result').innerText = `游戏结束！盈利: ¥${(finalValue - 500000).toFixed(2)}`;
+            }
+            // 亏损
+            else {
+                document.getElementById('result').innerText = `游戏结束！亏损: ¥${(500000 - finalValue).toFixed(2)}`;
+            }
+            // 股民等级判断
+            if (finalValue >= 500000) {
+                document.getElementById('level').innerText = '股民等级: 股侠';
+            } else if (finalValue >= 510000) {
+                document.getElementById('level').innerText = '股民等级: 股仙';
+            } else if (finalValue >= 550000) {
+                document.getElementById('level').innerText = '股民等级: 股尊';
+            } else if (finalValue >= 600000) {
+                document.getElementById('level').innerText = '股民等级: 股圣';
+            } else if (finalValue >= 1000000) {
+                document.getElementById('level').innerText = '股民等级: 黑客';
+            } else if (finalValue < 500000) {
+                document.getElementById('level').innerText = '股民等级: 韭菜';
+            }
+
+            // 显示结果
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('level').classList.remove('hidden');
+
+            // 禁用买入和卖出按钮
+            document.getElementById('buyBtn').disabled = true;
+            document.getElementById('sellBtn').disabled = true;
+
+            // 显示重新开始按钮
+            document.getElementById('resetBtn').classList.remove('hidden');
+        }
+
+        // 倒计时函数
+        function startTimer() {
+            timerInterval = setInterval(function () {
+                timeLeft--;
+                document.getElementById('time').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        // 开始游戏并实时更新指数
+        function startGame() {
+            // 在开始新游戏之前清除旧的计时器
+            clearInterval(timerInterval);
+            clearInterval(gameInterval);
+
+            initGame(); // 初始化游戏
+            gameInterval = setInterval(updateStockPrice, 1000); // 每秒更新指数
+            startTimer(); // 开始倒计时
+
+            // 隐藏重新开始按钮
+            document.getElementById('resetBtn').classList.add('hidden');
+        }
+
+        // 添加重新开始按钮事件监听
+        document.getElementById('resetBtn').addEventListener('click', startGame);
+        // 页面加载时启动游戏
+        window.onload = startGame;
+    </script>
+</body>
+
+</html>
