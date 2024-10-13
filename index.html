@@ -183,15 +183,20 @@
             // 股民等级判断
             if (finalValue >= 500000) {
                 document.getElementById('level').innerText = '股民等级: 股侠';
-            } else if (finalValue >= 510000) {
+            }
+            if (finalValue >= 510000) {
                 document.getElementById('level').innerText = '股民等级: 股仙';
-            } else if (finalValue >= 550000) {
+            }
+            if (finalValue >= 550000) {
                 document.getElementById('level').innerText = '股民等级: 股尊';
-            } else if (finalValue >= 600000) {
+            }
+            if (finalValue >= 600000) {
                 document.getElementById('level').innerText = '股民等级: 股圣';
-            } else if (finalValue >= 1000000) {
+            }
+            if (finalValue >= 1000000) {
                 document.getElementById('level').innerText = '股民等级: 黑客';
-            } else if (finalValue < 500000) {
+            }
+            if (finalValue < 500000) {
                 document.getElementById('level').innerText = '股民等级: 韭菜';
             }
 
